@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuoteForge AI</title>
+
+<style>
+body {
+  font-family: system-ui;
+  margin: 0;
+  background: #f6f7fb;
+  color: #172033;
+}
+
+main {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+button {
+  padding: 11px 15px;
+  border: 0;
+  border-radius: 9px;
+  background: #111827;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 8px 8px 0 0;
+}
+
+.plans {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plan {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 12px;
+  flex: 1;
+  min-width: 180px;
+}
+
+pre {
+  white-space: pre-wrap;
+  background: #f3f4f6;
+  padding: 15px;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<div class="card">
+
+<h1>QuoteForge AI</h1>
+
+<p>AI quotation assistant for UK trades.</p>
+
+<label>Customer enquiry</label>
+
+<textarea
+id="enquiry"
+placeholder="Paste a WhatsApp or email enquiry here...">
+</textarea>
+
+<button onclick="analyse()">
+Analyse with AI
+</button>
+
+<pre id="output">
+AI result will appear here.
+</pre>
+
+</div>
+
+<div class="card">
+
+<h2>Plans</h2>
+
+<div class="plans">
+
+<div class="plan">
+<h3>Starter</h3>
+<p>£19/month</p>
+<button onclick="checkout('starter')">
+Subscribe
+</button>
+</div>
+
+<div class="plan">
+<h3>Pro</h3>
+<p>£39/month</p>
+<button onclick="checkout('pro')">
+Subscribe
+</button>
+</div>
+
+<div class="plan">
+<h3>Business</h3>
+<p>£79/month</p>
+<button onclick="checkout('business')">
+Subscribe
+</button>
+</div>
+
+</div>
+</div>
+
+</main>
+
+<script>
+
+async function analyse() {
+
+  const enquiry =
+    document.getElementById("enquiry").value;
+
+  const output =
+    document.getElementById("output");
+
+  if (!enquiry.trim()) {
+    output.textContent =
+      "Please enter a customer enquiry.";
+    return;
+  }
+
+  output.textContent =
+    "Analysing enquiry...";
+
+  try {
+
+    const response =
+      await fetch("/api/analyse-enquiry", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          enquiry
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+    output.textContent =
+      data.result ||
+      data.error ||
+      "Something went wrong.";
+
+  } catch (error) {
+
+    output.textContent =
+      "Unable to connect to the AI service.";
+
+  }
+}
+
+async function checkout(plan) {
+
+  try {
+
+    const response =
+      await fetch("/api/create-checkout-session", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          plan
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert(data.error || "Checkout failed.");
+    }
+
+  } catch (error) {
+
+    alert(
+      "Unable to connect to payment service."
+    );
+
+  }
+}
+
+</script>
+
+</body>
+</html>
