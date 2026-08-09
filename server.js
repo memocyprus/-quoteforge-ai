@@ -61,7 +61,7 @@ app.post("/api/analyse-enquiry", async (req, res) => {
 
   try {
     const response = await ai.responses.create({
-      model: process.env.AI_MODEL || "gpt-5-mini",
+      model: process.env.AI_MODEL || "gpt-40-mini",
       input: [
         {
           role: "system",
