@@ -297,29 +297,26 @@ try {
     <h3>Notes</h3>
     ${makeList(result.notes)}
   `;
-} catch (e) {
-  output.textContent = data.result;
-}    
-    
+      } catch (e) {
+      output.textContent = data.result;
+    }
 
- 
-
-    output.textContent =
-      "Unable to connect to the AI service.";
-
+  } catch (error) {
+    console.error(error);
+    output.textContent = "Unable to connect to the AI service.";
   }
 }
 
-async function checkout(plan) {
 
-  try {
 
-    const response =
-      await fetch("/api/create-checkout-session", {
+  
 
-        method: "POST",
+  
 
-        headers: {
+
+  
+
+        
           "Content-Type": "application/json"
         },
 
