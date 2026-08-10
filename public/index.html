@@ -91,9 +91,9 @@ placeholder="Paste a WhatsApp or email enquiry here...">
 Analyse with AI
 </button>
 
-<pre id="output">
+<div id="output"> class="result">
 AI result will appear here.
-</pre>
+</div>
 
 </div>
 
@@ -171,12 +171,59 @@ async function analyse() {
     const data =
       await response.json();
 
-    output.textContent =
-      data.result ||
-      data.error ||
-      "Something went wrong.";
+if (!data.result) {
+  output.textContent =
+    data.error || "Something went wrong.";
+  return;
+}
 
-  } catch (error) {
+try {
+  let raw = data.result
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const result = JSON.parse(raw);
+
+  const makeList = (items) =>
+    Array.isArray(items) && items.length
+      ? `<ul>${items.map(item => `<li>${item}</li>`).join("")}</ul>`
+      : "<p>Not provided</p>";
+
+  output.innerHTML = `
+    <h3>Job summary</h3>
+    <div class="highlight">
+      <strong>${result.job_type || "Job enquiry"}</strong>
+    </div>
+
+    <h3>Tasks</h3>
+    ${makeList(result.tasks)}
+
+    <h3>Materials</h3>
+    ${makeList(result.materials)}
+
+    <h3>Estimated labour</h3>
+    <div class="highlight">
+      <strong>${result.estimated_labour_hours?.estimate || "Not available"}</strong>
+      <p>${result.estimated_labour_hours?.basis || ""}</p>
+      <p>${result.estimated_labour_hours?.certainty || ""}</p>
+    </div>
+
+    <h3>Missing information</h3>
+    ${makeList(result.missing_information)}
+
+    <h3>Questions to ask customer</h3>
+    ${makeList(result.questions_to_ask)}
+
+    <h3>Notes</h3>
+    ${makeList(result.notes)}
+  `;
+} catch (e) {
+  output.textContent = data.result;
+}    
+    
+
+ 
 
     output.textContent =
       "Unable to connect to the AI service.";
