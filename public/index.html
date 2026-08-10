@@ -265,9 +265,12 @@ try {
   const result = JSON.parse(raw);
 
   const makeList = (items) =>
-    Array.isArray(items) && items.length
-      ? `<ul>${items.map(item => `<li>${item}</li>`).join("")}</ul>`
-      : "<p>Not provided</p>";
+
+  Array.isArray(items) && items.length
+
+    ? `<ul>${items.map(item => `<li>${item}</li>`).join("")}</ul>`
+
+    : "<p>Not provided</p>";
 
   output.innerHTML = `
     <h3>Job summary</h3>
