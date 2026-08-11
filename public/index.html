@@ -165,7 +165,7 @@ id="enquiry"
 placeholder="Paste a WhatsApp or email enquiry here...">
 </textarea>
 
-<butt<button onclick="document.getElementById('output').textContent='Clicked - analyse type: ' + typeof analyse; if(typeof analyse==='function') analyse();">
+<button onclick="analyse()">
 Analyse with AI
 </button>
 
@@ -212,200 +212,137 @@ Subscribe
 </main>
 
 <script>
-
 async function analyse() {
-
   const enquiry = document.getElementById("enquiry").value;
-
   const output = document.getElementById("output");
 
   if (!enquiry.trim()) {
-
     output.textContent = "Please enter a customer enquiry.";
-
     return;
-
   }
 
   output.textContent = "Analysing enquiry...";
 
   try {
-
     const response = await fetch("/api/analyse-enquiry", {
-
       method: "POST",
-
       headers: {
-
         "Content-Type": "application/json"
-
       },
-
       body: JSON.stringify({
-
         enquiry: enquiry
-
       })
-
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-
       output.textContent =
-
         data.error || "Something went wrong.";
+      return;
+    }
+
+    if (!data.result) {
+      output.textContent = "No AI result received.";
+      return;
+    }
 
     let result;
 
-if (typeof data.result === "string") {
-  let raw = data.result
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
+    if (typeof data.result === "string") {
+      let raw = data.result
+        .replace(/```json/gi, "")
+        .replace(/```/g, "")
+        .trim();
 
-  result = JSON.parse(raw);
-} else {
-  result = data.result;
-}
-
-      const makeList = (items) =>
-
-        Array.isArray(items) && items.length
-
-          ? `<ul>${items
-
-              .map(item => `<li>${item}</li>`)
-
-              .join("")}</ul>`
-
-          : "<p>Not provided</p>";
-
-      output.innerHTML = `
-
-        <h3>Job summary</h3>
-
-        <div class="highlight">
-
-          <strong>${result.job_type || "Job enquiry"}</strong>
-
-        </div>
-
-        <h3>Tasks</h3>
-
-        ${makeList(result.tasks)}
-
-        <h3>Materials</h3>
-
-        ${makeList(result.materials)}
-
-        <h3>Estimated labour</h3>
-
-        <div class="highlight">
-
-          <strong>
-
-            ${result.estimated_labour_hours?.estimate || "Not provided"}
-
-          </strong>
-
-          <p>
-
-            ${result.estimated_labour_hours?.basis || ""}
-
-          </p>
-
-          <p>
-
-            ${result.estimated_labour_hours?.certainty || ""}
-
-          </p>
-
-        </div>
-
-        <h3>Missing information</h3>
-
-        ${makeList(result.missing_information)}
-
-        <h3>Questions to ask customer</h3>
-
-        ${makeList(result.questions_to_ask)}
-
-        <h3>Notes</h3>
-
-        ${makeList(result.notes)}
-
-      `;
-
-    } catch (e) {
-
-      console.error(e);
-
-      output.textContent = data.result;
-
+      try {
+        result = JSON.parse(raw);
+      } catch (e) {
+        output.textContent = data.result;
+        return;
+      }
+    } else {
+      result = data.result;
     }
 
+    const makeList = (items) =>
+      Array.isArray(items) && items.length
+        ? `<ul>${items
+            .map(item => `<li>${item}</li>`)
+            .join("")}</ul>`
+        : "<p>Not provided</p>";
+
+    output.innerHTML = `
+      <h3>Job summary</h3>
+      <div class="highlight">
+        <strong>${result.job_type || "Job enquiry"}</strong>
+      </div>
+
+      <h3>Tasks</h3>
+      ${makeList(result.tasks)}
+
+      <h3>Materials</h3>
+      ${makeList(result.materials)}
+
+      <h3>Estimated labour</h3>
+      <div class="highlight">
+        <strong>
+          ${result.estimated_labour_hours?.estimate || "Not provided"}
+        </strong>
+
+        <p>
+          ${result.estimated_labour_hours?.basis || ""}
+        </p>
+
+        <p>
+          ${result.estimated_labour_hours?.certainty || ""}
+        </p>
+      </div>
+
+      <h3>Missing information</h3>
+      ${makeList(result.missing_information)}
+
+      <h3>Questions to ask customer</h3>
+      ${makeList(result.questions_to_ask)}
+
+      <h3>Notes</h3>
+      ${makeList(result.notes)}
+    `;
+
   } catch (error) {
-
     console.error(error);
-
     output.textContent =
-
       "Unable to connect to the AI service.";
-
   }
-
 }
 
+
 async function checkout(plan) {
-
   try {
-
     const response = await fetch(
-
       "/api/create-checkout-session",
-
       {
-
         method: "POST",
-
         headers: {
-
           "Content-Type": "application/json"
-
         },
-
         body: JSON.stringify({
-
           plan: plan
-
         })
-
       }
-
     );
 
     const data = await response.json();
 
     if (data.url) {
-
       window.location.href = data.url;
-
     } else {
-
       alert(data.error || "Checkout failed.");
-
     }
 
   } catch (error) {
-
     console.error(error);
-
     alert("Unable to connect to payment service.");
-
   }
-
 }
-
 </script>
