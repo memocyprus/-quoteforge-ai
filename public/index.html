@@ -257,29 +257,18 @@ async function analyse() {
 
         data.error || "Something went wrong.";
 
-      return;
+    let result;
 
-    }
+if (typeof data.result === "string") {
+  let raw = data.result
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
 
-    if (!data.result) {
-
-      output.textContent = "No AI result received.";
-
-      return;
-
-    }
-
-    try {
-
-      let raw = data.result
-
-        .replace(/```json/gi, "")
-
-        .replace(/```/g, "")
-
-        .trim();
-
-      const result = JSON.parse(raw);
+  result = JSON.parse(raw);
+} else {
+  result = data.result;
+}
 
       const makeList = (items) =>
 
